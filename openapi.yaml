@@ -651,6 +651,7 @@ components:
       type: string
       enum: [Websocket, Bosh]
       example: Websocket
+      nullable: true
     CreateLiveStream:
       type: object
       properties:
@@ -676,6 +677,10 @@ components:
       example: https://api.yourcompany.com/avstack-auth
       nullable: true
       description: If auth_mode is Http, AVStack will POST to this URL when a participant attempts to connect. If auth_mode is not Http, this property must be null.
+    JitsiMeetVersion:
+      type: string
+      enum: [Stable6293, Stable6173, Stable5963, Stable5870, Rapid, Disabled]
+      nullable: true
     JwtKeyserverUrl:
       type: string
       format: uri
@@ -762,7 +767,6 @@ components:
           description: The user agent string, if known
         connection_type:
           $ref: '#/components/schema/ConnectionType'
-          nullable: true
         bridge_channels:
           type: array
           items:
