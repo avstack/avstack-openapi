@@ -1,0 +1,1177 @@
+openapi: "3.0.0"
+info:
+  version: "1.1.0"
+  title: AVStack API
+servers:
+- url: https://api.avstack.net
+  description: AVStack API
+tags:
+- name: Authentication
+- name: Account
+- name: Stacks
+- name: Conferences
+paths:
+  /session:
+    post:
+      summary: Retrieve time-limited credentials for accessing the API
+      description: |
+        The AVStack API uses time-limited tokens for authentication. Before making any requests to the API, you should get a token from this endpoint.
+
+        An expiration timestamp is included in the response. You should cache the returned token until close to this time, rather than getting a new one for every request.
+
+        Once you have an auth token, you can provide it when making other requests by passing it as a bearer token in the `Authorization` header, for example:
+
+        ```
+        Authorization: Bearer gUfjLbvDiXuAnaLCYCfsiFFzivZgKe30OzAcYzRL7617jgnahPIaXfeEWCCFisdyoOCjl4pmZL4AKe7s4FHMhMQZkdkntZhk9idW46AZgMxJNZiDwQKO6H63lEZoAQJH
+        ```
+      operationId: createSession
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - api_token
+              properties:
+                api_token:
+                  type: string
+                  description: An API token generated in the AVStack Console
+                  example: Qrw4jcRhQUAwSb7mWepFm6WWF5rEaI1XARIezIfXhuAWk8YjIlvXvVYn3LpJUpWi
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+  /account:
+    get:
+      summary: Get a list of accounts that you have access to
+      operationId: listAccounts
+      tags: [Account]
+      security:
+      - token: []
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+  /account/{accountId}:
+    parameters:
+    - name: accountId
+      in: path
+      schema:
+        $ref: '#/components/schemas/AccountId'
+      required: true
+    get:
+      summary: Get information about your own account
+      operationId: getAccount
+      tags: [Account]
+      security:
+      - token: []
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+  /account/{accountId}/stack:
+    parameters:
+    - name: accountId
+      in: path
+      schema:
+        $ref: '#/components/schemas/AccountId'
+      required: true
+    get:
+      summary: List all stacks within your account
+      operationId: listStacks
+      tags: [Stacks]
+      security:
+      - token: []
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stack'
+    post:
+      summary: Create a new stack
+      operationId: createStack
+      tags: [Stacks]
+      security:
+      - token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStack'
+      responses:
+        '201':
+          description: The stack was successfully created
+  /account/{accountId}/stack/{stackId}:
+    parameters:
+    - name: accountId
+      in: path
+      schema:
+        $ref: '#/components/schemas/AccountId'
+      required: true
+    - name: stackId
+      in: path
+      schema:
+        $ref: '#/components/schemas/StackId'
+      required: true
+    get:
+      summary: Get a specific stack within your account
+      operationId: getStack
+      tags: [Stacks]
+      security:
+      - token: []
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stack'
+    put:
+      summary: Update the settings of a stack
+      operationId: updateStack
+      tags: [Stacks]
+      security:
+      - token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStack'
+      responses:
+        '204':
+          description: 'Successful request'
+  /account/{accountId}/stack/{stackId}/interface:
+    parameters:
+    - name: accountId
+      in: path
+      schema:
+        $ref: '#/components/schemas/AccountId'
+      required: true
+    - name: stackId
+      in: path
+      schema:
+        $ref: '#/components/schemas/StackId'
+      required: true
+    get:
+      summary: Get interface configuration for a stack
+      operationId: getStackInterfaceConfig
+      tags: [Stacks]
+      security:
+      - token: []
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StackInterfaceConfig'
+    put:
+      summary: Update the interface configuration of a stack
+      operationId: updateStackInterfaceConfig
+      tags: [Stacks]
+      security:
+      - token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StackInterfaceConfig'
+      responses:
+        '204':
+          description: 'Successful request'
+  /account/{accountId}/stack/{stackId}/conference:
+    parameters:
+    - name: accountId
+      in: path
+      schema:
+        $ref: '#/components/schemas/AccountId'
+      required: true
+    - name: stackId
+      in: path
+      schema:
+        $ref: '#/components/schemas/StackId'
+      required: true
+    get:
+      summary: List conferences for a stack
+      operationId: listConferences
+      tags: [Conferences]
+      security:
+      - token: []
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Conference'
+  /account/{accountId}/stack/{stackId}/conference/{conferenceId}:
+    parameters:
+    - name: accountId
+      in: path
+      schema:
+        $ref: '#/components/schemas/AccountId'
+      required: true
+    - name: stackId
+      in: path
+      schema:
+        $ref: '#/components/schemas/StackId'
+      required: true
+    - name: conferenceId
+      in: path
+      schema:
+        $ref: '#/components/schemas/ConferenceId'
+      required: true
+    get:
+      summary: Get a specific conference
+      operationId: getConference
+      tags: [Conferences]
+      security:
+      - token: []
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conference'
+  /account/{accountId}/stack/{stackId}/conference/{conferenceId}/livestream:
+    parameters:
+    - name: accountId
+      in: path
+      schema:
+        $ref: '#/components/schemas/AccountId'
+      required: true
+    - name: stackId
+      in: path
+      schema:
+        $ref: '#/components/schemas/StackId'
+      required: true
+    - name: conferenceId
+      in: path
+      schema:
+        $ref: '#/components/schemas/ConferenceId'
+      required: true
+    get:
+      summary: Get live-streams for a conference
+      operationId: listLiveStreams
+      tags: [Conferences]
+      security:
+      - token: []
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LiveStream'
+    post:
+      summary: Start live-streaming a conference
+      operationId: createLiveStream
+      tags: [Conferences]
+      security:
+      - token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLiveStream'
+      responses:
+        '201':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveStream'
+  /account/{accountId}/stack/{stackId}/conference/{conferenceId}/livestream/{liveStreamId}:
+    parameters:
+    - name: accountId
+      in: path
+      schema:
+        $ref: '#/components/schemas/AccountId'
+      required: true
+    - name: stackId
+      in: path
+      schema:
+        $ref: '#/components/schemas/StackId'
+      required: true
+    - name: conferenceId
+      in: path
+      schema:
+        $ref: '#/components/schemas/ConferenceId'
+      required: true
+    - name: liveStreamId
+      in: path
+      schema:
+        $ref: '#/components/schemas/LiveStreamId'
+      required: true
+    get:
+      summary: Get a specific live-stream for a conference
+      operationId: getLiveStream
+      tags: [Conferences]
+      security:
+      - token: []
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveStream'
+    delete:
+      summary: Stop live-streaming a conference
+      operationId: deleteLiveStream
+      tags: [Conferences]
+      security:
+      - token: []
+      responses:
+        '204':
+          description: 'Successful request'
+  /account/{accountId}/stack/{stackId}/conference/{conferenceId}/recording:
+    parameters:
+    - name: accountId
+      in: path
+      schema:
+        $ref: '#/components/schemas/AccountId'
+      required: true
+    - name: stackId
+      in: path
+      schema:
+        $ref: '#/components/schemas/StackId'
+      required: true
+    - name: conferenceId
+      in: path
+      schema:
+        $ref: '#/components/schemas/ConferenceId'
+      required: true
+    get:
+      summary: Get recordings of a conference
+      operationId: getRecordings
+      tags: [Conferences]
+      security:
+      - token: []
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recording'
+    post:
+      summary: Start recording a conference
+      operationId: createRecording
+      tags: [Conferences]
+      security:
+      - token: []
+      responses:
+        '204':
+          description: 'Successful request'
+  /account/{accountId}/stack/{stackId}/conference/{conferenceId}/recording/{recordingId}:
+    parameters:
+    - name: accountId
+      in: path
+      schema:
+        $ref: '#/components/schemas/AccountId'
+      required: true
+    - name: stackId
+      in: path
+      schema:
+        $ref: '#/components/schemas/StackId'
+      required: true
+    - name: conferenceId
+      in: path
+      schema:
+        $ref: '#/components/schemas/ConferenceId'
+      required: true
+    - name: recordingId
+      in: path
+      schema:
+        $ref: '#/components/schemas/RecordingId'
+      required: true
+    get:
+      summary: Get a specific recording of a conference
+      operationId: getRecording
+      tags: [Conferences]
+      security:
+      - token: []
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recording'
+    put:
+      summary: Stop recording a conference
+      operationId: updateRecording
+      tags: [Conferences]
+      security:
+      - token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRecording'
+      responses:
+        '204':
+          description: 'Successful request'
+    delete:
+      summary: Delete a recording of a conference
+      operationId: deleteRecording
+      tags: [Conferences]
+      security:
+      - token: []
+      responses:
+        '204':
+          description: 'Successful request'
+  /account/{accountId}/stack/{stackId}/conference/{conferenceId}/transcription:
+    parameters:
+    - name: accountId
+      in: path
+      schema:
+        $ref: '#/components/schemas/AccountId'
+      required: true
+    - name: stackId
+      in: path
+      schema:
+        $ref: '#/components/schemas/StackId'
+      required: true
+    - name: conferenceId
+      in: path
+      schema:
+        $ref: '#/components/schemas/ConferenceId'
+      required: true
+    get:
+      summary: Get transcriptions of a conference
+      operationId: getTranscriptions
+      tags: [Conferences]
+      security:
+      - token: []
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transcription'
+  /account/{accountId}/stack/{stackId}/conference/{conferenceId}/transcription/{transcriptionId}:
+    parameters:
+    - name: accountId
+      in: path
+      schema:
+        $ref: '#/components/schemas/AccountId'
+      required: true
+    - name: stackId
+      in: path
+      schema:
+        $ref: '#/components/schemas/StackId'
+      required: true
+    - name: conferenceId
+      in: path
+      schema:
+        $ref: '#/components/schemas/ConferenceId'
+      required: true
+    - name: transcriptionId
+      in: path
+      schema:
+        $ref: '#/components/schemas/TranscriptionId'
+      required: true
+    get:
+      summary: Get a specific transcription of a conference
+      operationId: getTranscription
+      tags: [Conferences]
+      security:
+      - token: []
+      responses:
+        '200':
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transcription'
+components:
+  securitySchemes:
+    token:
+      type: http
+      scheme: bearer
+      bearerFormat: the token returned from the createSession operation
+  schemas:
+    Account:
+      type: object
+      required:
+      - id
+      - name
+      - webhook_secret
+      - my_role
+      properties:
+        id:
+          $ref: '#/components/schemas/AccountId'
+        name:
+          type: string
+        webhook_secret:
+          type: string
+          format: byte
+          description: the base64-encoded secret key used to generate the HMAC-SHA256 signature on requests that we send to your webhooks
+        my_role:
+          $ref: '#/components/schemas/Role'
+    AccountId:
+      type: string
+      format: uuid
+      example: 123e4567-e89b-12d3-a456-426614174000
+    AnonymousRoleMode:
+      type: string
+      enum: [FirstParticipantIsModerator, AllParticipantsAreModerators]
+      nullable: true
+      description: When using anonymous authentication, this property defines which participants are moderators. If auth_mode is not Anonymous, this property must be null.
+    AuthMode:
+      type: string
+      enum: [Anonymous, Http, Jwt, UsernamePassword]
+    BridgeChannel:
+      type: object
+      required:
+      - location_id
+      - bridge_name
+      - received_bytes
+      - sent_bytes
+      - received_packets
+      - sent_packets
+      - incoming_lost_packets
+      - outgoing_lost_packets
+      - timestamp
+      properties:
+        location_id:
+          $ref: '#/components/schemas/LocationId'
+        bridge_name:
+          type: string
+          example: sin-a1b2c3
+        received_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        sent_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        received_packets:
+          type: integer
+          format: int64
+          minimum: 0
+        sent_packets:
+          type: integer
+          format: int64
+          minimum: 0
+        incoming_lost_packets:
+          type: integer
+          format: int64
+          minimum: 0
+        outgoing_lost_packets:
+          type: integer
+          format: int64
+          minimum: 0
+        rtt:
+          type: number
+          minimum: 0
+          nullable: true
+          example: 15.1
+        bwe:
+          type: number
+          minimum: 0
+          nullable: true
+          example: 2048000
+        updated:
+          type: string
+          format: date-time
+    Codec:
+      type: string
+      enum: [VP8, VP9, H264]
+      example: VP8
+    Conference:
+      type: object
+      required:
+      - id
+      - name
+      - start
+      - quality
+      - participants
+      properties:
+        id:
+          $ref: '#/components/schemas/ConferenceId'
+        name:
+          type: string
+          example: topsecretconferencename
+        start:
+          type: string
+          format: date-time
+          description: When the conference started
+        finish:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the conference finished, or null if it is still active
+        quality:
+          $ref: '#/components/schemas/Quality'
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Participant'
+    ConferenceId:
+      type: string
+      format: uuid
+      example: 123e4567-e89b-12d3-a456-426614174000
+    ConnectionType:
+      type: string
+      enum: [Websocket, Bosh]
+      example: Websocket
+    CreateLiveStream:
+      type: object
+      properties:
+        simulcast_targets:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimulcastTarget'
+          description: RTMP or RTMPS URLs (RTMPS is recommended) to simulcast the stream to. Up to six targets can be supplied. This can be empty, in which case the stream will only be available at the returned AVStack HLS URL.
+    CreateStack:
+      type: object
+      required:
+      - slug
+      - primary_location_id
+      properties:
+        slug:
+          $ref: '#/components/schemas/Slug'
+        primary_location_id:
+          $ref: '#/components/schemas/LocationId'
+    HttpAuthenticationUrl:
+      type: string
+      pattern: ^https://
+      format: uri
+      example: https://api.yourcompany.com/avstack-auth
+      nullable: true
+      description: If auth_mode is Http, AVStack will POST to this URL when a participant attempts to connect. If auth_mode is not Http, this property must be null.
+    JwtKeyserverUrl:
+      type: string
+      format: uri
+      pattern: ^https://
+      example: https://asap.yourcompany.com/
+      description: If auth_mode is Jwt, this should be the URL to a keyserver containing public keys according to the ASAP standard. If auth_mode is not Jwt, this property must be null.
+    JwtOptional:
+      type: boolean
+      nullable: true
+      description: If auth_mode is Jwt, this indicates whether participants can still connect anonymously. If auth_mode is not Jwt, this property must be null.
+    LiveStream:
+      type: object
+      required:
+      - id
+      - hls_url
+      - start
+      properties:
+        id:
+          $ref: '#/components/schemas/LiveStreamId'
+        hls_url:
+          type: string
+          format: uri
+          pattern: ^https://
+          example: https://live.avstack.net/stream/123e4567-e89b-12d3-a456-426614174000.m3u8
+          description: The HLS URL for the livestream
+        start:
+          type: string
+          format: date-time
+          description: When the livestream started
+        finish:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the livestream finished, or null if it is still active
+    LiveStreamId:
+      type: string
+      format: uuid
+      example: 123e4567-e89b-12d3-a456-426614174000
+    LocationId:
+      type: string
+      pattern: "^[a-z]{3}$"
+      minLength: 3
+      maxLength: 3
+      example: sin
+    Participant:
+      type: object
+      required:
+      - id
+      - occupant_id
+      - jid
+      - start
+      - quality
+      - bridge_channels
+      - turn_allocations
+      properties:
+        id:
+          $ref: '#/components/schemas/ParticipantId'
+        occupant_id:
+          type: string
+        jid:
+          type: string
+        start:
+          type: string
+          format: date-time
+          description: When the participant joined the conference.
+        finish:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the participant left the conference, or null if they are still in the conference.
+        quality:
+          $ref: '#/components/schemas/Quality'
+        country:
+          type: string
+          nullable: true
+          description: The ISO country code, if known
+        region:
+          type: string
+          nullable: true
+          description: The ISO region code, if known
+        user_agent:
+          type: string
+          nullable: true
+          description: The user agent string, if known
+        connection_type:
+          $ref: '#/components/schema/ConnectionType'
+          nullable: true
+        bridge_channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/BridgeChannel'
+        turn_allocations:
+          type: array
+          items:
+            $ref: '#/components/schemas/TurnAllocation'
+    ParticipantId:
+      type: string
+      format: uuid
+      example: 123e4567-e89b-12d3-a456-426614174000
+    Quality:
+      type: string
+      enum: [Poor, Acceptable, Good, Excellent]
+      example: Excellent
+    Recording:
+      type: object
+      required:
+      - id
+      - start
+      - duration
+      - url
+      properties:
+        id:
+          $ref: '#/components/schemas/RecordingId'
+        start:
+          type: string
+          format: date-time
+        finish:
+          type: string
+          format: date-time
+          nullable: true
+        duration:
+          type: string
+          format: decimal
+          example: '242.17'
+        url:
+          type: string
+          format: uri
+          pattern: ^https://
+          example: 'https://s3.ap-southeast-1.amazonaws.com/avstack-recordings-20201219121520658100000001/123e4567-e89b-12d3-a456-426614174000.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=THISISANEXAMPLEURL%2F20010101%2Fap-southeast-1%2Fs3%2Faws4_request&X-Amz-Date=20010101T010101Z&X-Amz-Expires=300&X-Amz-Signature=THISISANEXAMPLEURL&X-Amz-SignedHeaders=host'
+          description: A signed URL for downloading the recording, valid for 300 seconds from the time it is retrieved
+    RecordingId:
+      type: string
+      format: uuid
+      example: 123e4567-e89b-12d3-a456-426614174000
+    Role:
+      type: string
+      enum: [Viewer, Collaborator, Owner]
+      example: Collaborator
+    Session:
+      type: object
+      required:
+        - token
+        - expiration
+      properties:
+        token:
+          type: string
+          example: gUfjLbvDiXuAnaLCYCfsiFFzivZgKe30OzAcYzRL7617jgnahPIaXfeEWCCFisdyoOCjl4pmZL4AKe7s4FHMhMQZkdkntZhk9idW46AZgMxJNZiDwQKO6H63lEZoAQJH
+        expiration:
+          type: string
+          format: date-time
+    SimulcastTarget:
+      type: object
+      required:
+      - url
+      - stream_key
+      properties:
+        url:
+          type: string
+          example: rtmps://live-api-s.facebook.com:443/rtmp/
+        stream_key:
+          type: string
+          example: "12345"
+    Slug:
+      type: string
+      minLength: 3
+      maxLength: 16
+      example: yourcompanyname
+      description: A short name for the stack, which forms part of the onavstack.net domain name for it.
+    Stack:
+      type: object
+      required:
+      - id
+      - slug
+      - primary_location_id
+      - auth_mode
+      - ready
+      - preferred_codec
+      - constraints_video_height_max
+      - stereo_audio
+      - allow_live_streaming
+      - allow_recording
+      - auto_record
+      - allow_transcription
+      - dial_in_max_price
+      - dial_out_max_price
+      - active_conference_count
+      - active_participant_count
+      properties:
+        id:
+          $ref: '#/components/schemas/StackId'
+        slug:
+          $ref: '#/components/schemas/Slug'
+        primary_location_id:
+          $ref: '#/components/schemas/LocationId'
+        allowed_location_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocationId'
+          nullable: true
+        auth_mode:
+          $ref: '#/components/schemas/AuthMode'
+        anonymous_role_mode:
+          $ref: '#/components/schemas/AnonymousRoleMode'
+        http_authentication_url:
+          $ref: '#/components/schemas/HttpAuthenticationUrl'
+        jwt_keyserver_url:
+          $ref: '#/components/schemas/JwtKeyserverUrl'
+        jwt_optional:
+          $ref: '#/components/schemas/JwtOptional'
+        ready:
+          type: boolean
+          description: Whether the stack is ready to handle conferences. When a stack is created, this value is initially false. Once the resources for the stack have been provisioned, which usually takes about 30-60 seconds, this value changes to true.
+        custom_domain:
+          type: string
+          format: hostname
+          nullable: true
+          description: The custom domain configured for this stack, if any.
+          example: meet.yourcompany.com
+        custom_domain_ready:
+          type: boolean
+          nullable: true
+          description: If a custom domain is configured for this stack, this value indicates whether it is ready to handle conferences. It becomes true once DNS has been correctly configured and validated for the custom domain. If no custom domain is configured for this stack, this value will be null.
+        preferred_codec:
+          $ref: '#/components/schemas/Codec'
+        constraints_video_height_max:
+          type: integer
+          example: 720
+        stereo_audio:
+          type: boolean
+        allow_live_streaming:
+          type: boolean
+        allow_recording:
+          type: boolean
+        auto_record:
+          type: boolean
+        allow_transcription:
+          type: boolean
+        dial_in_max_price:
+          type: string
+          format: decimal
+        dial_out_max_price:
+          type: string
+          format: decimal
+        maintenance_window_start:
+          type: string
+          format: time
+          nullable: true
+        active_conference_count:
+          type: integer
+          minimum: 0
+          example: 5
+          description: How many conferences are currently active on this stack.
+        active_participant_count:
+          type: integer
+          minimum: 0
+          example: 25
+          description: How many participants are currently active across all conferences on this stack. If the sum of this value for all the stacks in an account exceeds the number of seats in that account's subscription, overage will be charged.
+    StackCustomDomain:
+      type: object
+      required:
+      - domain
+      - active
+      properties:
+        domain:
+          type: string
+          format: hostname
+          example: meet.yourcompany.com
+        validation_label:
+          type: string
+          nullable: true
+          description: A unique label that must be prepended to the custom domain to validate it. This may be null immediately after the custom domain is created and will be populated after a few minutes.
+          example: _123456abcdefabc14521abc1235714123
+        active:
+          type: boolean
+          description: Whether the custom domain is active. Custom domains become active once the DNS for them is correctly configured and validated.
+    StackId:
+      type: string
+      format: uuid
+      example: 123e4567-e89b-12d3-a456-426614174000
+    StackInterfaceConfig:
+      type: object
+      required:
+      - app_name
+      - watermark_image_url
+      - watermark_link_url
+      - require_display_name
+      - self_user_name
+      - other_user_name
+      - enable_welcome_page
+      - enable_close_page
+      - enable_close_page_hints
+      - default_language
+      - enable_prejoin_page
+      - enable_insecure_room_name_warning
+      - enable_noisy_mic_warning
+      - enable_no_audio_warning
+      - enable_talk_while_muted_warning
+      - custom_css
+      properties:
+        app_name:
+          type: string
+          example: Your Company
+        watermark_image_url:
+          type: string
+          format: uri
+          pattern: ^https://
+          example: https://yourcompany.com/watermark.svg
+        watermark_link_url:
+          type: string
+          format: uri
+          example: https://yourcompany.com/
+        self_user_name:
+          type: string
+          example: Me
+        other_user_name:
+          type: string
+          example: Someone
+        require_display_name:
+          type: boolean
+        enable_welcome_page:
+          type: boolean
+        enable_close_page:
+          type: boolean
+        enable_close_page_hints:
+          type: boolean
+        default_language:
+          type: string
+          enum: [af, ar, hy, eu, bg, ca, zhCN, zhTW, hr, cs, da, nl, enGB, en, eo, et, fi, fr, frCA, de, el, he, hu, id, it, ja, kab, ko, lv, lt, ml, mr, oc, fa, pl, ptBR, ro, ru, sc, sr, sk, sl, es, esUS, sv, th, tr, uk, vi]
+          example: en
+        notice_message:
+          type: string
+          nullable: true
+        enable_prejoin_page:
+          type: boolean
+        enable_insecure_room_name_warning:
+          type: boolean
+        enable_noisy_mic_warning:
+          type: boolean
+        enable_no_audio_warning:
+          type: boolean
+        enable_talk_while_muted_warning:
+          type: boolean
+        jitsi_meet_version:
+          $ref: '#/components/schemas/JitsiMeetVersion'
+          nullable: true
+        custom_css:
+          type: string
+        dynamic_branding_url:
+          type: string
+          example: https://yourcompany.com/branding.json
+          nullable: true
+    Transcription:
+      type: object
+      required:
+      - id
+      - events
+      properties:
+        id:
+          $ref: '#/components/schemas/TranscriptionId'
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/TranscriptionEvent'
+    TranscriptionCandidate:
+      type: object
+      required:
+      - text
+      - confidence
+      properties:
+        text:
+          type: string
+          example: The quick brown fox
+        confidence:
+          type: number
+          format: double
+          description: A value between 0 and 1 indicating how confident the speech-to-text engine is in this transcription
+          example: '0.9711'
+    TranscriptionEvent:
+      type: object
+      required:
+      - event_type
+      - participant_id
+      - timestamp
+      properties:
+        event_type:
+          type: string
+          enum: [Join, Leave, Speech]
+          example: Speech
+        participant_id:
+          $ref: '#/components/schemas/ParticipantId'
+        timestamp:
+          type: string
+          format: date-time
+        language:
+          type: string
+          example: en-US
+          description: Present only if event_type is Speech
+        candidates:
+          type: array
+          description: Present only if event_type is Speech
+          items:
+            $ref: '#/components/schemas/TranscriptionCandidate'
+    TranscriptionId:
+      type: string
+      format: uuid
+      example: 123e4567-e89b-12d3-a456-426614174000
+    TurnAllocation:
+      type: object
+      required:
+      - allocation_number
+      - received_bytes
+      - sent_bytes
+      - received_packets
+      - sent_packets
+      - timestamp
+      properties:
+        allocation_number:
+          type: integer
+          format: int64
+        received_bytes:
+          type: integer
+          format: int64
+        sent_bytes:
+          type: integer
+          format: int64
+        received_packets:
+          type: integer
+          format: int64
+        sent_packets:
+          type: integer
+          format: int64
+        timestamp:
+          type: string
+          format: date-time
+    UpdateRecording:
+      type: object
+      required:
+      - active
+      properties:
+        active:
+          type: boolean
+          description: Whether the recording is currently in progress. This value may be updated from true to false to stop the recording, but cannot be updated from false to true to restart it – a new recording should be started instead.
+    UpdateStack:
+      type: object
+      required:
+      - primary_location_id
+      - auth_mode
+      - preferred_codec
+      - constraints_video_height_max
+      - stereo_audio
+      - allow_live_streaming
+      - allow_recording
+      - auto_record
+      - allow_transcription
+      - dial_in_max_price
+      - dial_out_max_price
+      properties:
+        primary_location_id:
+          $ref: '#/components/schemas/LocationId'
+        allowed_location_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocationId'
+          nullable: true
+        auth_mode:
+          $ref: '#/components/schemas/AuthMode'
+        anonymous_role_mode:
+          $ref: '#/components/schemas/AnonymousRoleMode'
+        http_authentication_url:
+          $ref: '#/components/schemas/HttpAuthenticationUrl'
+        jwt_keyserver_url:
+          $ref: '#/components/schemas/JwtKeyserverUrl'
+        jwt_optional:
+          $ref: '#/components/schemas/JwtOptional'
+        preferred_codec:
+          $ref: '#/components/schemas/Codec'
+        constraints_video_height_max:
+          type: integer
+          example: 720
+        stereo_audio:
+          type: boolean
+        allow_live_streaming:
+          type: boolean
+        allow_recording:
+          type: boolean
+        auto_record:
+          type: boolean
+        allow_transcription:
+          type: boolean
+        dial_in_max_price:
+          type: string
+          format: decimal
+        dial_out_max_price:
+          type: string
+          format: decimal
+        maintenance_window_start:
+          type: string
+          format: time
+          nullable: true
